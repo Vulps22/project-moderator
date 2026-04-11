@@ -1,7 +1,8 @@
 import { ServerService } from '../ServerService';
-import { DatabaseService } from '../../bot/services/DatabaseService';
+import { DatabaseClient } from '../../bot/services/DatabaseClient';
 import { Logger } from '../../bot/utils';
-jest.mock('../../bot/services/DatabaseService');
+
+jest.mock('../../bot/services/DatabaseClient');
 jest.mock('../../bot/utils');
 jest.mock('../../bot/config', () => ({
   Config: {
@@ -11,40 +12,39 @@ jest.mock('../../bot/config', () => ({
 
 describe('ServerService', () => {
   let serverService: ServerService;
-  let mockDb: jest.Mocked<DatabaseService>;
+  let mockDb: jest.Mocked<DatabaseClient>;
 
   beforeEach(() => {
-    mockDb = new DatabaseService({
-      host: 'localhost',
-      user: 'test',
-      password: 'test',
-      database: 'test'
-    }) as jest.Mocked<DatabaseService>;
+    jest.clearAllMocks();
+
+    mockDb = {
+      banUserServers: jest.fn(),
+      unbanUserServers: jest.fn(),
+      getUserOwnedServerCount: jest.fn(),
+      getServerUserCount: jest.fn(),
+      getServerBannedUserCount: jest.fn(),
+      upsertServer: jest.fn(),
+      getServer: jest.fn(),
+      updateServer: jest.fn(),
+    } as any;
 
     serverService = new ServerService(mockDb);
-    jest.clearAllMocks();
   });
 
   describe('banUserServers', () => {
     it('should ban all non-banned servers owned by user', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 2, changedRows: 2 });
+      mockDb.banUserServers.mockResolvedValue(2);
 
       const result = await serverService.banUserServers('123456789012345678', 'Spam');
 
-      expect(mockDb.update).toHaveBeenCalledWith('server', 'servers', {
-        is_banned: true,
-        ban_reason: 'Spam'
-      }, {
-        user_id: BigInt('123456789012345678'),
-        is_banned: false
-      });
+      expect(mockDb.banUserServers).toHaveBeenCalledWith('123456789012345678', 'Spam');
       expect(Logger.debug).toHaveBeenCalledWith('Banning all servers owned by user 123456789012345678 with reason: Spam');
       expect(Logger.debug).toHaveBeenCalledWith('Banned 2 servers owned by user 123456789012345678');
       expect(result).toBe(2);
     });
 
     it('should return 0 when user owns no unbanned servers', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 0, changedRows: 0 });
+      mockDb.banUserServers.mockResolvedValue(0);
 
       const result = await serverService.banUserServers('123456789012345678', 'Spam');
 
@@ -54,24 +54,18 @@ describe('ServerService', () => {
 
   describe('unbanUserServers', () => {
     it('should unban all banned servers owned by user', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 3, changedRows: 3 });
+      mockDb.unbanUserServers.mockResolvedValue(3);
 
       const result = await serverService.unbanUserServers('123456789012345678');
 
-      expect(mockDb.update).toHaveBeenCalledWith('server', 'servers', {
-        is_banned: false,
-        ban_reason: null
-      }, {
-        user_id: BigInt('123456789012345678'),
-        is_banned: true
-      });
+      expect(mockDb.unbanUserServers).toHaveBeenCalledWith('123456789012345678');
       expect(Logger.debug).toHaveBeenCalledWith('Unbanning all servers owned by user 123456789012345678');
       expect(Logger.debug).toHaveBeenCalledWith('Unbanned 3 servers owned by user 123456789012345678');
       expect(result).toBe(3);
     });
 
     it('should return 0 when user owns no banned servers', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 0, changedRows: 0 });
+      mockDb.unbanUserServers.mockResolvedValue(0);
 
       const result = await serverService.unbanUserServers('123456789012345678');
 
@@ -81,18 +75,16 @@ describe('ServerService', () => {
 
   describe('getUserOwnedServerCount', () => {
     it('should return count of servers owned by user', async () => {
-      mockDb.count.mockResolvedValue(5);
+      mockDb.getUserOwnedServerCount.mockResolvedValue(5);
 
       const result = await serverService.getUserOwnedServerCount('123456789012345678');
 
-      expect(mockDb.count).toHaveBeenCalledWith('server', 'servers', {
-        user_id: BigInt('123456789012345678')
-      });
+      expect(mockDb.getUserOwnedServerCount).toHaveBeenCalledWith('123456789012345678');
       expect(result).toBe(5);
     });
 
     it('should return 0 when user owns no servers', async () => {
-      mockDb.count.mockResolvedValue(0);
+      mockDb.getUserOwnedServerCount.mockResolvedValue(0);
 
       const result = await serverService.getUserOwnedServerCount('123456789012345678');
 
@@ -102,31 +94,32 @@ describe('ServerService', () => {
 
   describe('acceptTerms', () => {
     it('should mark server as having accepted terms', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 1, changedRows: 1 });
+      mockDb.updateServer.mockResolvedValue({} as any);
 
       await serverService.acceptTerms('987654321');
 
-      expect(Logger.debug).toHaveBeenCalledWith('Server 987654321 accepted terms');
+      expect(Logger.debug).toHaveBeenCalledWith('Updating server settings for 987654321');
     });
   });
 
   describe('acceptRules', () => {
     it('should grant can_create permission', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 1, changedRows: 1 });
+      mockDb.updateServer.mockResolvedValue({} as any);
 
       await serverService.acceptRules('987654321');
 
-      expect(Logger.debug).toHaveBeenCalledWith('Server 987654321 accepted rules');
+      expect(mockDb.updateServer).toHaveBeenCalledWith('987654321', { can_create: true });
     });
   });
 
   describe('setAnnouncementChannel', () => {
     it('should set announcement channel', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 1, changedRows: 1 });
+      mockDb.updateServer.mockResolvedValue({} as any);
 
       await serverService.setAnnouncementChannel('987654321', '111222333');
 
       expect(Logger.debug).toHaveBeenCalledWith('Setting announcement channel for server 987654321 to 111222333');
+      expect(mockDb.updateServer).toHaveBeenCalledWith('987654321', { announcement_channel: '111222333' });
     });
   });
 
@@ -134,7 +127,7 @@ describe('ServerService', () => {
     it('should return false for the official guild regardless of ban status', async () => {
       const result = await serverService.isServerBanned('1079206786021732412');
       expect(result).toBe(false);
-      expect(mockDb.get).not.toHaveBeenCalled();
+      expect(mockDb.getServer).not.toHaveBeenCalled();
     });
 
     it('should return ban reason when server is banned', async () => {

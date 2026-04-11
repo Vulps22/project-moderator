@@ -40,11 +40,11 @@ describe('reportModal', () => {
     });
 
     it('should create a report with the provided reason and confirm to user', async () => {
-        (db.get as jest.Mock).mockResolvedValue({ id: 42, question: 'Test question?' });
+        (db.getQuestion as jest.Mock).mockResolvedValue({ id: 42, question: 'Test question?' });
 
         await reportModal.execute(botInteraction);
 
-        expect(db.get).toHaveBeenCalledWith('question', 'questions', { id: 42 });
+        expect(db.getQuestion).toHaveBeenCalledWith(42);
         expect(reportService.createReport).toHaveBeenCalledWith(
             '111222333',
             '42',
@@ -69,7 +69,7 @@ describe('reportModal', () => {
     });
 
     it('should handle question not found', async () => {
-        (db.get as jest.Mock).mockResolvedValue(null);
+        (db.getQuestion as jest.Mock).mockResolvedValue(null);
 
         await reportModal.execute(botInteraction);
 

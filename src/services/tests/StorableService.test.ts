@@ -1,63 +1,62 @@
-import { DatabaseService } from '../../bot/services/DatabaseService';
+import { DatabaseClient } from '../../bot/services/DatabaseClient';
 import { StorableService } from '../StorableService';
 import { Storable as StorableInterface } from '../../bot/interface';
 import { Storable } from '../../bot/types';
 
-jest.mock('../../bot/services/DatabaseService');
+jest.mock('../../bot/services/DatabaseClient');
 
 describe('StorableService', () => {
-    let service: StorableService;
-    let mockDb: jest.Mocked<DatabaseService>;
+  let service: StorableService;
+  let mockDb: jest.Mocked<DatabaseClient>;
 
-    beforeEach(() => {
-        mockDb = new DatabaseService({
-            host: 'localhost',
-            user: 'test',
-            password: 'test',
-            database: 'test',
-        }) as jest.Mocked<DatabaseService>;
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-        service = new StorableService(mockDb);
-        jest.clearAllMocks();
+    mockDb = {
+      getStorable: jest.fn(),
+      listStorables: jest.fn(),
+    } as any;
+
+    service = new StorableService(mockDb);
+  });
+
+  describe('get', () => {
+    it('should return the storable when it exists', async () => {
+      const storable: StorableInterface = { id: Storable.Skip, name: 'Skip' };
+      mockDb.getStorable.mockResolvedValue(storable);
+
+      const result = await service.get(Storable.Skip);
+
+      expect(mockDb.getStorable).toHaveBeenCalledWith(Storable.Skip);
+      expect(result).toEqual(storable);
     });
 
-    describe('get', () => {
-        it('should return the storable when it exists', async () => {
-            const storable: StorableInterface = { id: Storable.Skip, name: 'Skip' };
-            (mockDb.get as jest.Mock).mockResolvedValue(storable);
+    it('should return null when the storable does not exist', async () => {
+      mockDb.getStorable.mockResolvedValue(null);
 
-            const result = await service.get(Storable.Skip);
+      const result = await service.get(Storable.Skip);
 
-            expect(mockDb.get).toHaveBeenCalledWith('core', 'storables', { id: Storable.Skip });
-            expect(result).toEqual(storable);
-        });
+      expect(result).toBeNull();
+    });
+  });
 
-        it('should return null when the storable does not exist', async () => {
-            (mockDb.get as jest.Mock).mockResolvedValue(null);
+  describe('list', () => {
+    it('should return all storables', async () => {
+      const storables: StorableInterface[] = [{ id: Storable.Skip, name: 'Skip' }];
+      mockDb.listStorables.mockResolvedValue(storables);
 
-            const result = await service.get(Storable.Skip);
+      const result = await service.list();
 
-            expect(result).toBeNull();
-        });
+      expect(mockDb.listStorables).toHaveBeenCalled();
+      expect(result).toEqual(storables);
     });
 
-    describe('list', () => {
-        it('should return all storables', async () => {
-            const storables: StorableInterface[] = [{ id: Storable.Skip, name: 'Skip' }];
-            (mockDb.list as jest.Mock).mockResolvedValue(storables);
+    it('should return an empty array when no storables exist', async () => {
+      mockDb.listStorables.mockResolvedValue([]);
 
-            const result = await service.list();
+      const result = await service.list();
 
-            expect(mockDb.list).toHaveBeenCalledWith('core', 'storables');
-            expect(result).toEqual(storables);
-        });
-
-        it('should return an empty array when no storables exist', async () => {
-            (mockDb.list as jest.Mock).mockResolvedValue([]);
-
-            const result = await service.list();
-
-            expect(result).toEqual([]);
-        });
+      expect(result).toEqual([]);
     });
+  });
 });

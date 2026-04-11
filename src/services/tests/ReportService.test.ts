@@ -1,34 +1,39 @@
 import { ReportService } from '../ReportService';
+import { DatabaseClient } from '../../bot/services/DatabaseClient';
 import { Logger, ModerationLogger } from '../../bot/utils';
 import { ReportStatus } from '../../bot/interface';
 import { TargetType } from '../../bot/types';
 
 jest.mock('../../bot/utils', () => ({
-    Logger: {
-        log: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-    },
-    ModerationLogger: {
-        logReport: jest.fn(),
-    }
+  Logger: {
+    log: jest.fn(),
+    debug: jest.fn(),
+    error: jest.fn(),
+  },
+  ModerationLogger: {
+    logReport: jest.fn(),
+  }
 }));
 
-const mockDb = {
-  insert: jest.fn(),
-  get: jest.fn(),
-};
+jest.mock('../../bot/services/DatabaseClient');
 
 describe('ReportService', () => {
   let reportService: ReportService;
+  let mockDb: jest.Mocked<DatabaseClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    reportService = new ReportService(mockDb as any);
+
+    mockDb = {
+      createReport: jest.fn(),
+      updateReport: jest.fn(),
+    } as any;
+
+    reportService = new ReportService(mockDb);
   });
 
   describe('createReport', () => {
-    it('should insert report and log it', async () => {
+    it('should create report via DS and log it', async () => {
       const mockReport = {
         id: 1,
         type: TargetType.Question,
@@ -39,8 +44,10 @@ describe('ReportService', () => {
         server_id: '987654321',
         moderator_id: null,
         ban_reason: null,
+        content: null,
+        message_id: null,
       };
-      mockDb.insert.mockResolvedValue({ rows: [mockReport] });
+      mockDb.createReport.mockResolvedValue(mockReport as any);
       (ModerationLogger.logReport as jest.Mock).mockResolvedValue(undefined);
 
       const result = await reportService.createReport(
@@ -52,31 +59,53 @@ describe('ReportService', () => {
         'Inappropriate content'
       );
 
-      expect(mockDb.insert).toHaveBeenCalledWith('moderation', 'reports', {
+      expect(mockDb.createReport).toHaveBeenCalledWith({
         type: TargetType.Question,
         reason: 'Inappropriate content',
-        status: ReportStatus.PENDING,
+        content: null,
         sender_id: '111222333',
         offender_id: '42',
         server_id: '987654321',
         moderator_id: null,
         ban_reason: null,
-        content: null,
       });
       expect(ModerationLogger.logReport).toHaveBeenCalledWith(mockReport);
       expect(result).toEqual(mockReport);
     });
 
+    it('should update message_id when logReport returns a message', async () => {
+      const mockReport = {
+        id: 1,
+        type: TargetType.Question,
+        reason: 'Test',
+        status: ReportStatus.PENDING,
+        sender_id: '111',
+        offender_id: '42',
+        server_id: '999',
+        moderator_id: null,
+        ban_reason: null,
+        content: null,
+        message_id: null,
+      };
+      const updatedReport = { ...mockReport, message_id: 'msg-abc' };
+      mockDb.createReport.mockResolvedValue(mockReport as any);
+      mockDb.updateReport.mockResolvedValue(updatedReport as any);
+      (ModerationLogger.logReport as jest.Mock).mockResolvedValue({ id: 'msg-abc' });
+
+      const result = await reportService.createReport('111', '42', null, TargetType.Question, '999', 'Test');
+
+      expect(mockDb.updateReport).toHaveBeenCalledWith(1, { message_id: 'msg-abc' });
+      expect(result.message_id).toBe('msg-abc');
+    });
+
     it('should default reason to "No reason provided"', async () => {
-      const mockReport = { id: 2, reason: 'No reason provided' };
-      mockDb.insert.mockResolvedValue({ rows: [mockReport] });
+      const mockReport = { id: 2, reason: 'No reason provided', message_id: null };
+      mockDb.createReport.mockResolvedValue(mockReport as any);
       (ModerationLogger.logReport as jest.Mock).mockResolvedValue(undefined);
 
       await reportService.createReport('111', '42', null, TargetType.Question, '999');
 
-      expect(mockDb.insert).toHaveBeenCalledWith(
-        'moderation',
-        'reports',
+      expect(mockDb.createReport).toHaveBeenCalledWith(
         expect.objectContaining({ reason: 'No reason provided' })
       );
     });

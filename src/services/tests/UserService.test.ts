@@ -1,8 +1,7 @@
 import { UserService } from '../UserService';
-import { DatabaseService } from '../../bot/services/DatabaseService';
+import { DatabaseClient } from '../../bot/services/DatabaseClient';
 import { Logger } from '../../bot/utils';
 
-// Mock Logger
 jest.mock('../../bot/utils', () => ({
   Logger: {
     debug: jest.fn(),
@@ -10,22 +9,37 @@ jest.mock('../../bot/utils', () => ({
   },
 }));
 
-// Mock DatabaseService
-jest.mock('../../bot/services/DatabaseService');
+jest.mock('../../bot/services/DatabaseClient');
 
 describe('UserService', () => {
   let userService: UserService;
-  let mockDb: jest.Mocked<DatabaseService>;
+  let mockDb: jest.Mocked<DatabaseClient>;
+
+  const mockUser = {
+    id: '123456789012345678',
+    username: 'testuser',
+    global_level: 5,
+    global_level_xp: 250,
+    banned_questions: 0,
+    rules_accepted: true,
+    is_banned: false,
+    ban_reason: null,
+    vote_count: 10,
+    ban_message_id: null,
+    delete_date: null,
+    created_datetime: new Date(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockDb = {
-      get: jest.fn(),
-      insert: jest.fn(),
-      update: jest.fn(),
-      count: jest.fn(),
-      query: jest.fn(),
+      getUser: jest.fn(),
+      upsertUser: jest.fn(),
+      banUser: jest.fn(),
+      unbanUser: jest.fn(),
+      getUserServerCount: jest.fn(),
+      getUserBannedServerCount: jest.fn(),
     } as any;
 
     userService = new UserService(mockDb);
@@ -33,33 +47,18 @@ describe('UserService', () => {
 
   describe('getUser', () => {
     it('should return user when found', async () => {
-      const mockUser = {
-        id: '123456789012345678',
-        username: 'testuser',
-        global_level: 5,
-        global_level_xp: 250,
-        banned_questions: 0,
-        rules_accepted: true,
-        is_banned: false,
-        ban_reason: null,
-        vote_count: 10,
-        ban_message_id: null,
-        delete_date: null,
-        created_datetime: new Date(),
-      };
-
-      mockDb.get.mockResolvedValue(mockUser);
+      mockDb.getUser.mockResolvedValue(mockUser);
 
       const result = await userService.getUser('123456789012345678');
 
-      expect(mockDb.get).toHaveBeenCalledWith('user', 'users', { id: BigInt('123456789012345678') });
+      expect(mockDb.getUser).toHaveBeenCalledWith('123456789012345678');
       expect(result).toEqual(mockUser);
       expect(Logger.debug).toHaveBeenCalledWith('Fetching user 123456789012345678');
       expect(Logger.debug).toHaveBeenCalledWith('User 123456789012345678 retrieved successfully');
     });
 
     it('should return null when user not found', async () => {
-      mockDb.get.mockResolvedValue(null);
+      mockDb.getUser.mockResolvedValue(null);
 
       const result = await userService.getUser('999999999999999999');
 
@@ -69,118 +68,52 @@ describe('UserService', () => {
   });
 
   describe('setUser', () => {
-    it('should create new user when user does not exist', async () => {
-      const newUser = {
-        id: '123456789012345678',
-        username: 'newuser',
-        global_level: 0,
-        global_level_xp: 0,
-        banned_questions: 0,
-        rules_accepted: false,
-        is_banned: false,
-        ban_reason: null,
-        vote_count: 0,
-        ban_message_id: null,
-        delete_date: null,
-        created_datetime: new Date(),
-      };
+    it('should upsert user and return result', async () => {
+      mockDb.upsertUser.mockResolvedValue(mockUser);
 
-      mockDb.get.mockResolvedValue(null);
-      mockDb.insert.mockResolvedValue({
-        affectedRows: 1,
-        insertId: 1,
-        rows: [newUser],
-      });
+      const result = await userService.setUser({ id: '123456789012345678', username: 'testuser' });
 
-      const result = await userService.setUser({ id: '123456789012345678', username: 'newuser' });
-
-      expect(mockDb.insert).toHaveBeenCalled();
-      expect(Logger.debug).toHaveBeenCalledWith('User 123456789012345678 created successfully');
-      expect(result).toEqual(newUser);
+      expect(mockDb.upsertUser).toHaveBeenCalledWith('123456789012345678', 'testuser');
+      expect(result).toEqual(mockUser);
+      expect(Logger.debug).toHaveBeenCalledWith('User 123456789012345678 upserted successfully');
     });
 
-    it('should update existing user', async () => {
-      const existingUser = {
-        id: '123456789012345678',
-        username: 'olduser',
-        global_level: 5,
-        global_level_xp: 250,
-        banned_questions: 0,
-        rules_accepted: true,
-        is_banned: false,
-        ban_reason: null,
-        vote_count: 10,
-        ban_message_id: null,
-        delete_date: null,
-        created_datetime: new Date(),
-      };
+    it('should use empty string username when not provided', async () => {
+      mockDb.upsertUser.mockResolvedValue(mockUser);
 
-      const updatedUser = { ...existingUser, username: 'newusername' };
+      await userService.setUser({ id: '123456789012345678' });
 
-      mockDb.get.mockResolvedValueOnce(existingUser).mockResolvedValueOnce(updatedUser);
-      mockDb.update.mockResolvedValue({ affectedRows: 1, changedRows: 1 });
-
-      const result = await userService.setUser({ id: '123456789012345678', username: 'newusername' });
-
-      expect(mockDb.update).toHaveBeenCalled();
-      expect(Logger.debug).toHaveBeenCalledWith('User 123456789012345678 updated successfully');
-      expect(result).toEqual(updatedUser);
+      expect(mockDb.upsertUser).toHaveBeenCalledWith('123456789012345678', '');
     });
   });
 
   describe('banUser', () => {
     it('should ban user with reason', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 1, changedRows: 1 });
+      mockDb.banUser.mockResolvedValue(mockUser);
 
       await userService.banUser('123456789012345678', 'Spam');
 
-      expect(mockDb.update).toHaveBeenCalledWith(
-        'user',
-        'users',
-        {
-          is_banned: true,
-          ban_reason: 'Spam',
-        },
-        { id: BigInt('123456789012345678') }
-      );
+      expect(mockDb.banUser).toHaveBeenCalledWith('123456789012345678', 'Spam', undefined);
       expect(Logger.debug).toHaveBeenCalledWith('Banning user 123456789012345678 with reason: Spam');
       expect(Logger.debug).toHaveBeenCalledWith('User 123456789012345678 banned successfully');
     });
 
     it('should ban user with message ID', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 1, changedRows: 1 });
+      mockDb.banUser.mockResolvedValue(mockUser);
 
       await userService.banUser('123456789012345678', 'Spam', '999888777666555444');
 
-      expect(mockDb.update).toHaveBeenCalledWith(
-        'user',
-        'users',
-        {
-          is_banned: true,
-          ban_reason: 'Spam',
-          ban_message_id: BigInt('999888777666555444'),
-        },
-        { id: BigInt('123456789012345678') }
-      );
+      expect(mockDb.banUser).toHaveBeenCalledWith('123456789012345678', 'Spam', '999888777666555444');
     });
   });
 
   describe('unbanUser', () => {
-    it('should unban user and clear ban data', async () => {
-      mockDb.update.mockResolvedValue({ affectedRows: 1, changedRows: 1 });
+    it('should unban user', async () => {
+      mockDb.unbanUser.mockResolvedValue(mockUser);
 
       await userService.unbanUser('123456789012345678');
 
-      expect(mockDb.update).toHaveBeenCalledWith(
-        'user',
-        'users',
-        {
-          is_banned: false,
-          ban_reason: null,
-          ban_message_id: null,
-        },
-        { id: BigInt('123456789012345678') }
-      );
+      expect(mockDb.unbanUser).toHaveBeenCalledWith('123456789012345678');
       expect(Logger.debug).toHaveBeenCalledWith('Unbanning user 123456789012345678');
       expect(Logger.debug).toHaveBeenCalledWith('User 123456789012345678 unbanned successfully');
     });
@@ -188,7 +121,7 @@ describe('UserService', () => {
 
   describe('isUserBanned', () => {
     it('should return ban reason if user is banned', async () => {
-      mockDb.get.mockResolvedValue({ id: BigInt('123456789012345678'), is_banned: true, ban_reason: 'Harassment' });
+      mockDb.getUser.mockResolvedValue({ ...mockUser, is_banned: true, ban_reason: 'Harassment' });
 
       const result = await userService.isUserBanned('123456789012345678');
 
@@ -196,7 +129,7 @@ describe('UserService', () => {
     });
 
     it('should return default reason if banned with no reason', async () => {
-      mockDb.get.mockResolvedValue({ id: BigInt('123456789012345678'), is_banned: true, ban_reason: null });
+      mockDb.getUser.mockResolvedValue({ ...mockUser, is_banned: true, ban_reason: null });
 
       const result = await userService.isUserBanned('123456789012345678');
 
@@ -204,7 +137,7 @@ describe('UserService', () => {
     });
 
     it('should return false if user is not banned', async () => {
-      mockDb.get.mockResolvedValue({ id: BigInt('123456789012345678'), is_banned: false, ban_reason: null });
+      mockDb.getUser.mockResolvedValue({ ...mockUser, is_banned: false });
 
       const result = await userService.isUserBanned('123456789012345678');
 
@@ -212,7 +145,7 @@ describe('UserService', () => {
     });
 
     it('should return false if user does not exist', async () => {
-      mockDb.get.mockResolvedValue(null);
+      mockDb.getUser.mockResolvedValue(null);
 
       const result = await userService.isUserBanned('123456789012345678');
 
@@ -222,44 +155,23 @@ describe('UserService', () => {
 
   describe('getUserServerCount', () => {
     it('should return count of servers user is in', async () => {
-      mockDb.count.mockResolvedValue(5);
+      mockDb.getUserServerCount.mockResolvedValue(5);
 
       const result = await userService.getUserServerCount('123456789012345678');
 
-      expect(mockDb.count).toHaveBeenCalledWith('server', 'server_users', {
-        user_id: BigInt('123456789012345678')
-      });
+      expect(mockDb.getUserServerCount).toHaveBeenCalledWith('123456789012345678');
       expect(result).toBe(5);
     });
   });
 
   describe('getUserBannedServerCount', () => {
-    it('should return count of servers user is banned from', async () => {
-      mockDb.query.mockResolvedValue([{ count: '3' }]);
+    it('should return count of banned servers', async () => {
+      mockDb.getUserBannedServerCount.mockResolvedValue(3);
 
       const result = await userService.getUserBannedServerCount('123456789012345678');
 
-      expect(mockDb.query).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT COUNT(*)'),
-        [BigInt('123456789012345678')]
-      );
+      expect(mockDb.getUserBannedServerCount).toHaveBeenCalledWith('123456789012345678');
       expect(result).toBe(3);
-    });
-
-    it('should return 0 when user is not banned from any servers', async () => {
-      mockDb.query.mockResolvedValue([{ count: '0' }]);
-
-      const result = await userService.getUserBannedServerCount('123456789012345678');
-
-      expect(result).toBe(0);
-    });
-
-    it('should return 0 when query returns empty result', async () => {
-      mockDb.query.mockResolvedValue([]);
-
-      const result = await userService.getUserBannedServerCount('123456789012345678');
-
-      expect(result).toBe(0);
     });
   });
 });
