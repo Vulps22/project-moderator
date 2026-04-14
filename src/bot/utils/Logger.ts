@@ -61,7 +61,7 @@ export class Logger {
     return sanitized;
   }
 
-  private static async safeWebhookFetch(url: string, method: string, body: any, context: string): Promise<void> {
+  private static async safeWebhookFetch(url: string, method: string, body: Record<string, unknown>, context: string): Promise<void> {
     console.log(`\n[Logger Trace] Executing safeWebhookFetch for: ${context}`);
     console.log(`[Logger Trace] Method: ${method}`);
     
