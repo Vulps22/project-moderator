@@ -1,4 +1,4 @@
-import { BotButtonInteraction } from '../../../../bot/structures';
+import { BotButtonInteraction } from '@vulps22/bot-interactions';
 import skip from '../../question/skip';
 import { challengeService, inventoryService, questionService, votingService } from '../../../../services';
 import { Storable } from '../../../../bot/types';

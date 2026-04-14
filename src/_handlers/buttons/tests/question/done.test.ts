@@ -1,4 +1,4 @@
-import { BotButtonInteraction } from '../../../../bot/structures';
+import { BotButtonInteraction } from '@vulps22/bot-interactions';
 import done from '../../question/done';
 
 describe.skip('done button handler', () => {

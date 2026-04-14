@@ -1,9 +1,10 @@
 import { ServerProfileBuilder } from "../../../bot/builders/ServerProfileBuilder";
-import { BotButtonInteraction } from "../../../bot/structures";
+import { BotButtonInteraction } from "@vulps22/bot-interactions";
 import { Handler } from "../../../bot/utils";
 import { moderationService } from "../../../services";
 import { serverView } from "../../../views";
-import { TargetType } from "../../../bot/types";
+import { TargetType } from "@vulps22/project-encourage-types";
+import { MessageEditOptions } from "discord.js";
 
 const banServerButton: Handler<BotButtonInteraction> = {
     name: "banServer",
@@ -30,7 +31,7 @@ const banServerButton: Handler<BotButtonInteraction> = {
             time: 60_000
         }).catch(async () => {
             const revertedView = await serverView(profile);
-            await interaction.message.edit(revertedView as any);
+            await interaction.message.edit(revertedView as unknown as MessageEditOptions);
         });
     }
 };

@@ -1,5 +1,5 @@
 import { ButtonInteraction } from 'discord.js';
-import { BotButtonInteraction } from '../../../../bot/structures';
+import { BotButtonInteraction } from '@vulps22/bot-interactions';
 import viewOffenderButton from '../../moderation/viewOffender';
 import { UserProfileBuilder } from '../../../../bot/builders/UserProfileBuilder';
 import { userProfileView } from '../../../../views';

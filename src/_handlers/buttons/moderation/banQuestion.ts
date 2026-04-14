@@ -1,8 +1,8 @@
 import { Handler, ModerationLogger } from "../../../bot/utils";
 import { moderationService, questionService } from "../../../services";
 import { QuestionNotFoundError } from "../../../bot/errors/QuestionNotFoundError";
-import { QuestionType, TargetType } from "../../../bot/types";
-import { BotButtonInteraction } from "../../../bot/structures";
+import { QuestionType, TargetType } from "@vulps22/project-encourage-types";
+import { BotButtonInteraction } from "@vulps22/bot-interactions";
 
 const approveQuestionButton: Handler<BotButtonInteraction> = {
     name: "banQuestion",

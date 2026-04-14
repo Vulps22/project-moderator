@@ -1,6 +1,6 @@
 import { MessageCreateOptions, TextChannel } from "discord.js";
 import { Config } from "../../../bot/config";
-import { BotButtonInteraction } from "../../../bot/structures";
+import { BotButtonInteraction } from "@vulps22/bot-interactions";
 import { Handler } from "../../../bot/utils";
 import { userProfileView } from "../../../views";
 import { UserProfileBuilder } from "../../../bot/builders/UserProfileBuilder";

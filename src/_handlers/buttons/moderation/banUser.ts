@@ -1,10 +1,11 @@
 
-import { BotButtonInteraction } from "../../../bot/structures";
+import { BotButtonInteraction } from "@vulps22/bot-interactions";
 import { Handler } from "../../../bot/utils";
 import { moderationService } from "../../../services";
 import { userProfileView } from "../../../views";
-import { TargetType } from "../../../bot/types";
+import { TargetType } from "@vulps22/project-encourage-types";
 import { UserProfileBuilder } from "../../../bot/builders/UserProfileBuilder";
+import { MessageEditOptions } from "discord.js";
 
 const banUserButton: Handler<BotButtonInteraction> = {
     name: "banUser",
@@ -33,7 +34,7 @@ const banUserButton: Handler<BotButtonInteraction> = {
             time: 60_000
         }).catch(async () => {
             const revertedView = await userProfileView(profile);
-            await interaction.message.edit(revertedView as any);
+            await interaction.message.edit(revertedView as unknown as MessageEditOptions);
         });
     }
 };

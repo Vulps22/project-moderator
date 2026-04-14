@@ -1,7 +1,7 @@
 import { moderationService, questionService, reportService } from "../../../services";
-import { BotSelectMenuInteraction } from "../../../bot/structures";
+import { BotSelectMenuInteraction } from "@vulps22/bot-interactions";
 import { Handler, Logger, ModerationLogger } from "../../../bot/utils";
-import { QuestionType } from "../../../bot/types";
+import { QuestionType } from "@vulps22/project-encourage-types";
 
 const questionBanReasonSelected: Handler<BotSelectMenuInteraction> = {
     name: "questionBanReasonSelected",
@@ -46,7 +46,7 @@ const questionBanReasonSelected: Handler<BotSelectMenuInteraction> = {
             }
 
         } catch (error) {
-            Logger.error(`Error banning question: ${error}`);
+            Logger.error(`Error banning question: ${JSON.stringify(error)}`);
             await interaction.ephemeralFollowUp('❌ Failed to ban question. Please try again.');
         }
     }

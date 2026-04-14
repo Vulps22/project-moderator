@@ -1,10 +1,10 @@
 import { ButtonInteraction } from 'discord.js';
-import { BotButtonInteraction } from '../../../../bot/structures';
+import { BotButtonInteraction } from '@vulps22/bot-interactions';
 import banServerButton from '../../moderation/banServer';
 import { moderationService } from '../../../../services';
 import { ServerProfileBuilder } from '../../../../bot/builders/ServerProfileBuilder';
 import { serverView } from '../../../../views';
-import { TargetType } from '../../../../bot/types';
+import { TargetType } from '@vulps22/project-encourage-types';
 
 jest.mock('../../../../services');
 jest.mock('../../../../bot/builders/ServerProfileBuilder');

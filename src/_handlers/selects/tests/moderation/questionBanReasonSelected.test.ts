@@ -1,5 +1,5 @@
 import questionBanReasonSelected from '../../moderation/questionBanReasonSelected';
-import { BotSelectMenuInteraction } from '../../../../bot/structures';
+import { BotSelectMenuInteraction } from '@vulps22/bot-interactions';
 import { moderationService, questionService } from '../../../../services';
 import { Logger, ModerationLogger } from '../../../../bot/utils';
 

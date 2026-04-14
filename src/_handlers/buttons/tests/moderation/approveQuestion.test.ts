@@ -1,5 +1,5 @@
 import approveQuestionButton from '../../moderation/approveQuestion';
-import { BotButtonInteraction } from '../../../../bot/structures';
+import { BotButtonInteraction } from '@vulps22/bot-interactions';
 import { moderationService, questionService } from '../../../../services';
 import { Logger } from '../../../../bot/utils';
 import { LoggerService } from '../../../../services/LoggerService';

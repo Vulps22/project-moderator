@@ -1,8 +1,8 @@
 import { ModalSubmitInteraction } from 'discord.js';
 import reportModal from '../../question/reportModal';
 import { db, reportService } from '../../../../services';
-import { BotModalInteraction } from '../../../../bot/structures';
-import { TargetType } from '../../../../bot/types';
+import { BotModalInteraction } from '@vulps22/bot-interactions';
+import { TargetType } from '@vulps22/project-encourage-types';
 
 jest.mock('../../../../services');
 

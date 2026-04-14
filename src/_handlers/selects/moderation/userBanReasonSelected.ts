@@ -1,5 +1,5 @@
 import { UserProfileBuilder } from "../../../bot/builders/UserProfileBuilder";
-import { BotSelectMenuInteraction } from "../../../bot/structures";
+import { BotSelectMenuInteraction } from "@vulps22/bot-interactions";
 import { Handler, Logger } from "../../../bot/utils";
 import { moderationService, questionService, reportService, serverService, userService } from "../../../services";
 import { userProfileView } from "../../../views";

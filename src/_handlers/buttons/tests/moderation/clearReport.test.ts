@@ -1,9 +1,8 @@
 import { ButtonInteraction } from 'discord.js';
-import { BotButtonInteraction } from '../../../../bot/structures';
+import { BotButtonInteraction } from '@vulps22/bot-interactions';
 import clearReportButton from '../../moderation/clearReport';
 import { moderationService, reportService } from '../../../../services';
-import { ReportStatus } from '../../../../bot/interface';
-import { TargetType } from '../../../../bot/types';
+import { ReportStatus, TargetType } from '@vulps22/project-encourage-types';
 
 jest.mock('../../../../services');
 
