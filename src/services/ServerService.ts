@@ -1,7 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { DatabaseClient } from '../bot/services/DatabaseClient';
 import { Logger } from '../bot/utils';
-import { Server } from '../bot/interface';
+import { Server } from '@vulps22/project-encourage-types';
 import { Config } from '../bot/config';
 
 export class ServerService {
@@ -52,7 +52,7 @@ export class ServerService {
   async updateServerSettings(serverId: Snowflake, settings: Partial<Server>): Promise<void> {
     Logger.debug(`Updating server settings for ${serverId}`);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _id, user_id: _userId, ...rest } = settings;
+    const { id: id, user_id: userId, ...rest } = settings;
     if (Object.keys(rest).length > 0) {
       await this.db.updateServer(serverId, rest);
     }

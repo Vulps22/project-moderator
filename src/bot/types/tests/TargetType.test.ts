@@ -1,4 +1,4 @@
-import { TargetType } from '../TargetType';
+import { TargetType } from '@vulps22/project-encourage-types';
 
 describe('TargetType enum', () => {
     it('should have correct string values', () => {

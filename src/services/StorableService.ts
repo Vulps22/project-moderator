@@ -1,5 +1,5 @@
 import { DatabaseClient } from '../bot/services/DatabaseClient';
-import { Storable } from '../bot/interface';
+import { Storable } from '@vulps22/project-encourage-types';
 
 export class StorableService {
   constructor(private db: DatabaseClient) {}

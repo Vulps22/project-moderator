@@ -1,6 +1,6 @@
 import report from '../report';
 import { reportService } from '../../services';
-import { TargetType } from '../../bot/types';
+import { TargetType } from '@vulps22/project-encourage-types';
 
 jest.mock('../../services', () => ({
   reportService: {

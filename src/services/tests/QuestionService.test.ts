@@ -1,6 +1,6 @@
 import { QuestionService } from '../QuestionService';
 import { DatabaseClient } from '../../bot/services/DatabaseClient';
-import { QuestionType } from '../../bot/types';
+import { QuestionType } from '@vulps22/project-encourage-types';
 
 jest.mock('../../bot/services/DatabaseClient');
 

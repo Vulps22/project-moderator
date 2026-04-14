@@ -1,7 +1,9 @@
+/* eslint-disable */
 import { Pool, PoolClient } from 'pg';
 
 /**
  * Database query result for SELECT operations
+ * @deprecated - use DatabaseClient
  */
 export interface QueryResult<T = any> {
   rows: T[];
@@ -10,6 +12,7 @@ export interface QueryResult<T = any> {
 
 /**
  * Database mutation result for INSERT, UPDATE, DELETE operations
+ * @deprecated - use DatabaseClient
  */
 export interface MutationResult {
   affectedRows: number;
@@ -20,6 +23,7 @@ export interface MutationResult {
 
 /**
  * Database connection pool configuration
+ * @deprecated - use DatabaseClient
  */
 export interface DatabaseConfig {
   host: string;
@@ -34,6 +38,7 @@ export interface DatabaseConfig {
 
 /**
  * Query options for list and get operations
+ * @deprecated - use DatabaseClient
  */
 export interface QueryOptions {
   limit?: number;
@@ -42,18 +47,19 @@ export interface QueryOptions {
 
 /**
  * Transaction callback function type
+ * @deprecated - use DatabaseClient
  */
 export type TransactionCallback<T> = (db: DatabaseService) => Promise<T>;
 
 /**
  * DatabaseService - Centralized database operations handler
- * 
- * Provides a consistent interface for all database operations with:
+ * * Provides a consistent interface for all database operations with:
  * - Connection pooling for optimal performance
  * - Parameterized queries for SQL injection prevention
  * - Comprehensive error handling
  * - TypeScript type safety
  * - Transaction support
+ * * @deprecated - use DatabaseClient
  */
 export class DatabaseService {
   private pool: Pool;
@@ -62,6 +68,7 @@ export class DatabaseService {
   /**
    * Creates a new DatabaseService instance
    * @param config Database configuration options
+   * @deprecated - use DatabaseClient
    */
   constructor(config: DatabaseConfig) {
     try {
@@ -85,6 +92,7 @@ export class DatabaseService {
    * @param conditions WHERE conditions as key-value pairs
    * @param options Query options (offset for pagination)
    * @returns Single record or null if not found
+   * @deprecated - use DatabaseClient
    */
   async get<T = any>(
     schema: string,
@@ -133,6 +141,7 @@ export class DatabaseService {
    * @param conditions WHERE conditions as key-value pairs
    * @param options Query options (limit, offset)
    * @returns Array of records
+   * @deprecated - use DatabaseClient
    */
   async list<T = any>(
     schema: string,
@@ -148,7 +157,6 @@ export class DatabaseService {
       const values: any[] = [];
       let paramIndex = 1;
 
-      // Add WHERE clause if conditions provided
       if (Object.keys(conditions).length > 0) {
         const whereClause = Object.keys(conditions)
           .map((key) => {
@@ -160,7 +168,6 @@ export class DatabaseService {
         query += ` WHERE ${whereClause}`;
       }
 
-      // Add LIMIT and OFFSET
       if (options?.limit !== undefined) {
         query += ` LIMIT $${paramIndex++}`;
         values.push(options.limit);
@@ -184,6 +191,7 @@ export class DatabaseService {
    * @param table Table name
    * @param conditions WHERE conditions as key-value pairs
    * @returns Number of matching records
+   * @deprecated - use DatabaseClient
    */
   async count(schema: string, table: string, conditions: Record<string, any> = {}): Promise<number> {
     try {
@@ -194,7 +202,6 @@ export class DatabaseService {
       const values: any[] = [];
       let paramIndex = 1;
 
-      // Add WHERE clause if conditions provided
       if (Object.keys(conditions).length > 0) {
         const whereClause = Object.keys(conditions)
           .map((key) => {
@@ -220,6 +227,7 @@ export class DatabaseService {
    * @param table Table name
    * @param data Record data as key-value pairs
    * @returns Mutation result with insertId
+   * @deprecated - use DatabaseClient
    */
   async insert(schema: string, table: string, data: Record<string, any>): Promise<MutationResult> {
     try {
@@ -259,6 +267,7 @@ export class DatabaseService {
    * @param data Record data as key-value pairs
    * @param conflictColumns Columns that define uniqueness (ON CONFLICT target)
    * @returns Mutation result
+   * @deprecated - use DatabaseClient
    */
   async upsert(
     schema: string,
@@ -301,60 +310,57 @@ export class DatabaseService {
     }
   }
 
+  /**
+   * Update records
+   * @deprecated - use DatabaseClient
+   */
   async update(
-  schema: string,
-  table: string,
-  data: Record<string, any>,
-  conditions: Record<string, any>
-): Promise<MutationResult> {
-  let query = '';
-  const values: any[] = [];
+    schema: string,
+    table: string,
+    data: Record<string, any>,
+    conditions: Record<string, any>
+  ): Promise<MutationResult> {
+    let query = '';
+    const values: any[] = [];
 
-  try {
-    this.validateTableName(schema);
-    this.validateTableName(table);
+    try {
+      this.validateTableName(schema);
+      this.validateTableName(table);
 
-    if (Object.keys(data).length === 0) {
-      throw new Error('Update data cannot be empty');
+      if (Object.keys(data).length === 0) throw new Error('Update data cannot be empty');
+      if (Object.keys(conditions).length === 0) throw new Error('Update conditions cannot be empty');
+
+      let paramIndex = 1;
+
+      const setClause = Object.keys(data)
+        .map((key) => {
+          this.validateColumnName(key);
+          values.push(data[key]);
+          return `"${key}" = $${paramIndex++}`;
+        })
+        .join(', ');
+
+      const whereClause = Object.keys(conditions)
+        .map((key) => {
+          this.validateColumnName(key);
+          values.push(conditions[key]);
+          return `"${key}" = $${paramIndex++}`;
+        })
+        .join(' AND ');
+
+      query = `UPDATE "${schema}"."${table}" SET ${setClause} WHERE ${whereClause} RETURNING *`;
+      const client = this.transactionClient || this.pool;
+      const result = await client.query(query, values);
+
+      return {
+        affectedRows: result.rowCount || 0,
+        changedRows: result.rowCount || 0,
+        rows: result.rows,
+      };
+    } catch (error) {
+      throw new Error(`Failed to update records in ${schema}.${table}: ${this.getErrorMessage(error)}`);
     }
-
-    if (Object.keys(conditions).length === 0) {
-      throw new Error('Update conditions cannot be empty - this prevents accidental full table updates');
-    }
-
-    let paramIndex = 1;
-
-    // Build SET clause
-    const setClause = Object.keys(data)
-      .map((key) => {
-        this.validateColumnName(key);
-        values.push(data[key]);
-        return `"${key}" = $${paramIndex++}`;
-      })
-      .join(', ');
-
-    // Build WHERE clause
-    const whereClause = Object.keys(conditions)
-      .map((key) => {
-        this.validateColumnName(key);
-        values.push(conditions[key]);
-        return `"${key}" = $${paramIndex++}`;
-      })
-      .join(' AND ');
-
-    query = `UPDATE "${schema}"."${table}" SET ${setClause} WHERE ${whereClause} RETURNING *`;
-    const client = this.transactionClient || this.pool;
-    const result = await client.query(query, values);
-
-    return {
-      affectedRows: result.rowCount || 0,
-      changedRows: result.rowCount || 0,
-      rows: result.rows,
-    };
-  } catch (error) {
-    throw new Error(`Failed to update records in ${schema}.${table}: ${this.getErrorMessage(error)}\nQuery: ${query}\nValues: ${JSON.stringify(values)}`);
   }
-}
 
   /**
    * Delete records
@@ -362,6 +368,7 @@ export class DatabaseService {
    * @param table Table name
    * @param conditions WHERE conditions as key-value pairs
    * @returns Mutation result with affectedRows
+   * @deprecated - use DatabaseClient
    */
   async delete(schema: string, table: string, conditions: Record<string, any>): Promise<MutationResult> {
     try {
@@ -369,13 +376,12 @@ export class DatabaseService {
       this.validateTableName(table);
 
       if (Object.keys(conditions).length === 0) {
-        throw new Error('Delete conditions cannot be empty - this prevents accidental full table deletion');
+        throw new Error('Delete conditions cannot be empty');
       }
 
       const values: any[] = [];
       let paramIndex = 1;
 
-      // Build WHERE clause
       const whereClause = Object.keys(conditions)
         .map((key) => {
           this.validateColumnName(key);
@@ -398,9 +404,9 @@ export class DatabaseService {
 
   /**
    * Execute a custom SELECT query with parameters
-   * @param sql SQL query string with $1, $2, etc. placeholders
+   * @param sql SQL query string
    * @param params Query parameters
-   * @returns Array of result rows
+   * @deprecated - use DatabaseClient
    */
   async query<T = any>(sql: string, params: any[] = []): Promise<T[]> {
     try {
@@ -413,10 +419,10 @@ export class DatabaseService {
   }
 
   /**
-   * Execute a custom mutation query (INSERT, UPDATE, DELETE) with parameters
-   * @param sql SQL query string with $1, $2, etc. placeholders
+   * Execute a custom mutation query
+   * @param sql SQL query string
    * @param params Query parameters
-   * @returns Mutation result
+   * @deprecated - use DatabaseClient
    */
   async execute(sql: string, params: any[] = []): Promise<MutationResult> {
     try {
@@ -435,15 +441,13 @@ export class DatabaseService {
   /**
    * Execute multiple operations within a transaction
    * @param callback Function containing transaction operations
-   * @returns Result from the callback function
+   * @deprecated - use DatabaseClient
    */
   async transaction<T>(callback: TransactionCallback<T>): Promise<T> {
     const client = await this.pool.connect();
     
     try {
       await client.query('BEGIN');
-      
-      // Create a new DatabaseService instance with transaction client
       const transactionalDb = Object.create(DatabaseService.prototype);
       transactionalDb.pool = this.pool;
       transactionalDb.transactionClient = client;
@@ -461,9 +465,7 @@ export class DatabaseService {
 
   /**
    * Test database connection
-   * Attempts to get a connection from the pool to verify connectivity
-   * @returns true if connection successful
-   * @throws Error if connection fails
+   * @deprecated - use DatabaseClient
    */
   async testConnection(): Promise<boolean> {
     let client;
@@ -482,7 +484,7 @@ export class DatabaseService {
 
   /**
    * Close the connection pool
-   * Call this when shutting down the application
+   * @deprecated - use DatabaseClient
    */
   async close(): Promise<void> {
     try {
@@ -493,8 +495,7 @@ export class DatabaseService {
   }
 
   /**
-   * Validate table name to prevent SQL injection
-   * @param table Table name
+   * @deprecated - use DatabaseClient
    */
   private validateTableName(table: string): void {
     if (!/^[a-zA-Z0-9_]+$/.test(table)) {
@@ -503,8 +504,7 @@ export class DatabaseService {
   }
 
   /**
-   * Validate column name to prevent SQL injection
-   * @param column Column name
+   * @deprecated - use DatabaseClient
    */
   private validateColumnName(column: string): void {
     if (!/^[a-zA-Z0-9_]+$/.test(column)) {
@@ -513,9 +513,7 @@ export class DatabaseService {
   }
 
   /**
-   * Extract error message from unknown error type
-   * @param error Error object
-   * @returns Error message string
+   * @deprecated - use DatabaseClient
    */
   private getErrorMessage(error: unknown): string {
     console.log('Error details:', error);

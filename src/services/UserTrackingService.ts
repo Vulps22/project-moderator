@@ -29,8 +29,8 @@ export class UserTrackingService {
     }, 10 * 60 * 1000);
 
     // Allow process to exit if this is the only active handle
-    if (this.cleanupTimer && typeof (this.cleanupTimer as any).unref === 'function') {
-      (this.cleanupTimer as any).unref();
+    if (this.cleanupTimer && typeof (this.cleanupTimer).unref === 'function') {
+      (this.cleanupTimer).unref();
     }
   }
 

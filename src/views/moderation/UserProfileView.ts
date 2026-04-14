@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SectionBuilder, SeparatorBuilder, StringSelectMenuBuilder, TextDisplayBuilder } from "discord.js";
-import { UserProfile } from "../../bot/interface";
-import { UniversalMessage } from "../../bot/types";
+import { UserProfile } from "@vulps22/project-encourage-types";
+import { UniversalMessage } from "@vulps22/bot-interactions";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function userProfileView(profile: UserProfile, banReasons: any[] | null = null): Promise<UniversalMessage> {

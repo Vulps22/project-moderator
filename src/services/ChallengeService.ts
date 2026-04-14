@@ -1,8 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { DatabaseClient } from '../bot/services/DatabaseClient';
 import { Logger } from '../bot/utils';
-import { Challenge } from '../bot/interface';
-import { QuestionType } from '../bot/types';
+import { Challenge, QuestionType } from '@vulps22/project-encourage-types';
 
 export class ChallengeService {
   constructor(private db: DatabaseClient) {}

@@ -1,6 +1,6 @@
 import { DatabaseClient } from '../../bot/services/DatabaseClient';
 import { VotingService } from '../VotingService';
-import { ChallengeVote } from '../../bot/interface';
+import { ChallengeVote } from '@vulps22/project-encourage-types';
 
 jest.mock('../../bot/services/DatabaseClient');
 

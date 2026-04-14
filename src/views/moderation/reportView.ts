@@ -1,9 +1,9 @@
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SeparatorBuilder, StringSelectMenuBuilder, TextDisplayBuilder } from "discord.js";
-import { Report, ReportStatus } from "../../bot/interface";
-import { TargetType, UniversalMessage } from "../../bot/types";
+import { Report, ReportStatus, TargetType } from "@vulps22/project-encourage-types";
+import { UniversalMessage } from "@vulps22/bot-interactions";
 
-async function ReportView(report: Report, banReasons: [] | null ): Promise<UniversalMessage> {
+function reportView(report: Report, banReasons: [] | null ): UniversalMessage {
     const title = new TextDisplayBuilder()
         .setContent(`## **New Report Submitted**`);
 
@@ -77,4 +77,4 @@ async function ReportView(report: Report, banReasons: [] | null ): Promise<Unive
     return message;
 }
 
-export { ReportView };
+export { reportView as ReportView };

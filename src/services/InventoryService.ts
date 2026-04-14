@@ -1,6 +1,6 @@
 import { Snowflake } from 'discord.js';
 import { DatabaseClient } from '../bot/services/DatabaseClient';
-import { InventoryItem } from '../bot/interface';
+import { InventoryItem } from '@vulps22/project-encourage-types';
 import { Storable } from '../bot/types';
 
 export class InventoryService {

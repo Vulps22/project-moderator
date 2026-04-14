@@ -1,5 +1,5 @@
 import { Message, MessageCreateOptions, MessageEditOptions, TextChannel } from "discord.js";
-import { UniversalMessage } from "../bot/types";
+import { UniversalMessage } from "@vulps22/bot-interactions";
 
 export class LoggerService {
   private static async resolveChannel(channelId: string): Promise<TextChannel> {

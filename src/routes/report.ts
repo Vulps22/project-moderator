@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ApiRoute } from '../bot/api/types/ApiRoute';
 import { reportService } from '../services';
-import { TargetType } from '../bot/types';
+import { TargetType } from '@vulps22/project-encourage-types';
 
 const report: ApiRoute = {
   async post(req: Request, res: Response): Promise<void> {

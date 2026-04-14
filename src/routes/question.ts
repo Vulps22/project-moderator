@@ -3,7 +3,7 @@ import { ApiRoute } from '../bot/api/types/ApiRoute';
 import { questionService } from '../services';
 import { LoggerService } from '../services/LoggerService';
 import { newQuestionView } from '../views/moderation/newQuestionView';
-import { Question } from '../bot/interface';
+import { Question, QuestionType } from '@vulps22/project-encourage-types';
 
 const question: ApiRoute = {
   async post(req: Request, res: Response): Promise<void> {
@@ -16,14 +16,14 @@ const question: ApiRoute = {
       return;
     }
 
-    const question = await questionService.getQuestionById(questionId) as Question | null;
+    const question: Question | null = await questionService.getQuestionById(questionId);
 
     if (!question) {
       res.status(404).json({ error: 'Question not found' });
       return;
     }
 
-    const channelId = question.type === 'truth' ? process.env.TRUTHS_CHANNEL_ID : process.env.DARES_CHANNEL_ID;
+    const channelId = question.type === QuestionType.Truth ? process.env.TRUTHS_CHANNEL_ID : process.env.DARES_CHANNEL_ID;
     if (!channelId) {
       res.status(500).json({ error: 'Channel ID not configured' });
       return;

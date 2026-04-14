@@ -1,8 +1,7 @@
 import { ReportService } from '../ReportService';
 import { DatabaseClient } from '../../bot/services/DatabaseClient';
 import { Logger, ModerationLogger } from '../../bot/utils';
-import { ReportStatus } from '../../bot/interface';
-import { TargetType } from '../../bot/types';
+import { ReportStatus, TargetType } from '@vulps22/project-encourage-types';
 
 jest.mock('../../bot/utils', () => ({
   Logger: {

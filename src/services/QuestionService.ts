@@ -1,7 +1,6 @@
 import { Snowflake } from 'discord.js';
 import { DatabaseClient } from '../bot/services/DatabaseClient';
-import { QuestionType } from '../bot/types';
-import { Question } from '../bot/interface';
+import type { QuestionType, Question } from '@vulps22/project-encourage-types';
 
 export class QuestionService {
   constructor(private db: DatabaseClient) {}

@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SeparatorBuilder, StringSelectMenuBuilder, TextDisplayBuilder } from "discord.js";
-import { ServerProfile } from "../../bot/interface/ServerProfileInterface";
-import { UniversalMessage } from "../../bot/types";
+import { ServerProfile } from "@vulps22/project-encourage-types";
+import { UniversalMessage } from "@vulps22/bot-interactions";
 
 async function serverView(server: ServerProfile, banReasons: [] | null = null): Promise<UniversalMessage> {
 

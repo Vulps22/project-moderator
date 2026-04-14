@@ -1,8 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { DatabaseClient } from '../bot/services/DatabaseClient';
 import { Logger, ModerationLogger } from '../bot/utils';
-import { Report, ReportStatus } from '../bot/interface';
-import { TargetType } from '../bot/types';
+import { Report, TargetType } from '@vulps22/project-encourage-types';
 
 declare const global: { client: import('discord.js').Client };
 
@@ -49,7 +48,7 @@ export class ReportService {
       await user.send(message);
       Logger.debug(`Notified reporter ${report.sender_id} for report ${report.id}`);
     } catch (error) {
-      Logger.debug(`Could not notify reporter ${report.sender_id} for report ${report.id}: ${error}`);
+      Logger.debug(`Could not notify reporter ${report.sender_id} for report ${report.id}: ${JSON.stringify(error)}`);
     }
   }
 }

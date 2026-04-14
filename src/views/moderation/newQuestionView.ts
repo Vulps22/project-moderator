@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SeparatorBuilder, StringSelectMenuBuilder, TextDisplayBuilder } from "discord.js";
-import { Question } from "../../bot/interface";
-import { UniversalMessage } from "../../bot/types";
+import type { Question } from "@vulps22/project-encourage-types";
+import { UniversalMessage } from "@vulps22/bot-interactions";
 
 async function newQuestionView(question: Question, banReasons: [] | null = null, prefetched?: { username?: string, guildName?: string }): Promise<UniversalMessage> {
 

@@ -1,11 +1,17 @@
 import { DatabaseClient } from '../bot/services/DatabaseClient';
-import { Question, Report, ReportStatus } from '../bot/interface';
+import { Question, Report, ReportStatus, QuestionType, TargetType } from '@vulps22/project-encourage-types';
 import { Logger, ModerationLogger } from '../bot/utils';
-import { QuestionType, TargetType } from '../bot/types';
 import { Message, Snowflake } from 'discord.js';
 import { banReasons } from '../bot/config';
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+//TODO: move into own file
+export interface BanReason {
+  label: string;
+  value: string;
+  // add other fields if they exist, like 'description'
+}
+
+ 
 export class ModerationService {
   constructor(private db: DatabaseClient) {}
 
@@ -25,7 +31,7 @@ export class ModerationService {
       Logger.debug(`Question ${question.id} would be sent to approval queue in channel ${channelId}`);
       return message.id;
     } catch (error) {
-      Logger.debug(`Failed to send question ${question.id} to approval queue: ${error}`);
+      Logger.debug(`Failed to send question ${question.id} to approval queue: ${JSON.stringify(error)}`);
       throw error;
     }
   }
@@ -37,7 +43,7 @@ export class ModerationService {
       if (!result) throw new Error(`Question with ID ${questionId} not found`);
       Logger.debug(`Question ${questionId} approved successfully`);
     } catch (error) {
-      Logger.debug(`Failed to approve question ${questionId}: ${error}`);
+      Logger.debug(`Failed to approve question ${questionId}: ${JSON.stringify(error)}`);
       throw error;
     }
   }
@@ -49,7 +55,7 @@ export class ModerationService {
       if (!result) throw new Error(`Question with ID ${questionId} not found`);
       Logger.debug(`Question ${questionId} banned successfully`);
     } catch (error) {
-      Logger.debug(`Failed to ban question ${questionId}: ${error}`);
+      Logger.debug(`Failed to ban question ${questionId}: ${JSON.stringify(error)}`);
       throw error;
     }
   }
@@ -61,12 +67,12 @@ export class ModerationService {
       if (!result) throw new Error(`Server with ID ${serverId} not found`);
       Logger.debug(`Server ${serverId} banned successfully`);
     } catch (error) {
-      Logger.debug(`Failed to ban server ${serverId}: ${error}`);
+      Logger.debug(`Failed to ban server ${serverId}: ${JSON.stringify(error)}`);
       throw error;
     }
   }
 
-  getBanReasons(type: TargetType): {}[] {
+  getBanReasons(type: TargetType): BanReason[] {
     return banReasons[type];
   }
 
@@ -77,7 +83,7 @@ export class ModerationService {
   }
 
   async clearReport(reportId: number, moderatorId: string): Promise<void> {
-    await Logger.log(`Clearing report ${reportId} by moderator ${moderatorId}`);
+    Logger.log(`Clearing report ${reportId} by moderator ${moderatorId}`);
     try {
       const activeReport = await this.db.getReport(reportId);
       if (!activeReport) throw new Error(`Report with ID ${reportId} not found`);
@@ -98,13 +104,13 @@ export class ModerationService {
 
       Logger.debug(`Report ${reportId} cleared successfully`);
     } catch (error) {
-      Logger.error(`Failed to clear report ${reportId}: ${error}`);
+      Logger.error(`Failed to clear report ${reportId}: ${JSON.stringify(error)}`);
       throw error;
     }
   }
 
   async actioningReport(reportId: number, moderatorId: string): Promise<Report> {
-    await Logger.log(`Marking report ${reportId} as actioning by moderator ${moderatorId}`);
+    Logger.log(`Marking report ${reportId} as actioning by moderator ${moderatorId}`);
     try {
       const updated = await this.db.updateReport(reportId, {
         status: ReportStatus.ACTIONING,
@@ -114,7 +120,7 @@ export class ModerationService {
       Logger.debug(`Report ${reportId} marked as actioning successfully`);
       return updated;
     } catch (error) {
-      Logger.error(`Failed to mark report ${reportId} as actioning: ${error}`);
+      Logger.error(`Failed to mark report ${reportId} as actioning: ${JSON.stringify(error)}`);
       throw error;
     }
   }
@@ -128,7 +134,7 @@ export class ModerationService {
   }
 
   async actionedReport(reportId: number, moderatorId: string): Promise<void> {
-    await Logger.log(`Marking report ${reportId} as actioned by moderator ${moderatorId}`);
+    Logger.log(`Marking report ${reportId} as actioned by moderator ${moderatorId}`);
     try {
       const activeReport = await this.db.getReport(reportId);
       if (!activeReport) throw new Error(`Report with ID ${reportId} not found`);
@@ -149,7 +155,7 @@ export class ModerationService {
 
       Logger.debug(`Report ${reportId} marked as actioned successfully`);
     } catch (error) {
-      Logger.error(`Failed to mark report ${reportId} as actioned: ${error}`);
+      Logger.error(`Failed to mark report ${reportId} as actioned: ${JSON.stringify(error)}`);
       throw error;
     }
   }

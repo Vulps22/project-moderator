@@ -1,7 +1,6 @@
 import { ModerationService } from '../ModerationService';
 import { DatabaseClient } from '../../bot/services/DatabaseClient';
-import { Question, Report, ReportStatus } from '../../bot/interface';
-import { QuestionType, TargetType } from '../../bot/types';
+import { Question, Report, ReportStatus, QuestionType, TargetType } from '@vulps22/project-encourage-types';
 import { Logger, ModerationLogger } from '../../bot/utils';
 
 const mockConfig = {

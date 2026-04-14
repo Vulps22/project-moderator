@@ -1,6 +1,6 @@
 import { DatabaseClient } from '../../bot/services/DatabaseClient';
 import { StorableService } from '../StorableService';
-import { Storable as StorableInterface } from '../../bot/interface';
+import { Storable as StorableInterface } from '@vulps22/project-encourage-types';
 import { Storable } from '../../bot/types';
 
 jest.mock('../../bot/services/DatabaseClient');

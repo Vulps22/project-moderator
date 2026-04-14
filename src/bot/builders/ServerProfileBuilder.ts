@@ -1,6 +1,6 @@
 import { Snowflake } from "discord.js";
 import { Logger } from "../utils";
-import { ServerProfile } from "../interface/ServerProfileInterface";
+import { ServerProfile } from "@vulps22/project-encourage-types";
 import { questionService, serverService } from "../../services";
 
 export class ServerProfileBuilder {
