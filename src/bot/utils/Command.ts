@@ -1,5 +1,6 @@
-import { AutocompleteInteraction, SlashCommandBuilder } from 'discord.js';
-import { BotCommandInteraction } from '../structures';
+/* eslint-disable */
+import { AutocompleteInteraction, RESTPostAPIChatInputApplicationCommandsJSONBody, SlashCommandBuilder } from 'discord.js';
+import { BotCommandInteraction } from '@vulps22/bot-interactions';
 
 /**
  * Subcommand - Helper for building subcommands with a fluent API
@@ -248,7 +249,7 @@ export class Command {
     await this._autoComplete(interaction);
   }
 
-  toJSON(): any {
+  toJSON(): RESTPostAPIChatInputApplicationCommandsJSONBody {
     return this.builder.toJSON();
   }
 }

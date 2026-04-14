@@ -1,7 +1,6 @@
 import { ModerationLogger } from '../ModerationLogger';
 import { Logger } from '../Logger';
-import { Question, Report, ReportStatus } from '../../interface';
-import { QuestionType, TargetType } from '../../types';
+import { Question, Report, ReportStatus, QuestionType, TargetType } from '@vulps22/project-encourage-types';
 
 jest.mock('../Logger', () => ({
     Logger: {

@@ -1,5 +1,5 @@
 import { Command } from '../Command';
-import { BotCommandInteraction } from '../../structures';
+import { BotCommandInteraction } from '@vulps22/bot-interactions';
 import { AutocompleteInteraction } from 'discord.js';
 
 describe('Command', () => {

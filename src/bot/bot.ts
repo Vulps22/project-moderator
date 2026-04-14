@@ -4,7 +4,7 @@ import { join } from 'path';
 import { Handler, Command, Logger } from './utils';
 import { EventHandler } from './types';
 import { Config } from './config';
-import { BotButtonInteraction, BotModalInteraction, BotSelectMenuInteraction } from './structures';
+import { BotButtonInteraction, BotModalInteraction, BotSelectMenuInteraction } from '@vulps22/bot-interactions';
 import { createServer } from './api/server';
 
 /**
@@ -179,7 +179,7 @@ async function registerGlobalCommands(rest: REST, commands: Command[]): Promise<
     try {
         await rest.put(
             Routes.applicationCommands(process.env.CLIENT_ID!),
-            { body: commands.map(cmd => cmd.toJSON()) }
+            { body: commands.map(cmd => cmd.toJSON() ) }
         );
         Logger.debug(`Registered ${commands.length} global commands`);
     } catch (error) {

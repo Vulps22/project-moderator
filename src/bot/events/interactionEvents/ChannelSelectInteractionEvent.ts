@@ -1,6 +1,6 @@
 import { ChannelSelectMenuInteraction, MessageFlags } from "discord.js";
 import { InteractionEvent } from "./InteractionEvent";
-import { BotSelectMenuInteraction } from "../../structures";
+import { BotSelectMenuInteraction } from "@vulps22/bot-interactions";
 import { Handler, Logger } from "../../utils";
 
 class ChannelSelectInteractionEvent implements InteractionEvent<ChannelSelectMenuInteraction> {
@@ -14,11 +14,11 @@ class ChannelSelectInteractionEvent implements InteractionEvent<ChannelSelectMen
         }
         try {
             await selectHandler.execute(botSelectInteraction);
-            await Logger.updateExecution(executionId, 'Success');
+            Logger.updateExecution(executionId, 'Success');
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             Logger.error(`ChannelSelect execution error (${botSelectInteraction.baseId}): ${errorMessage}`);
-            await Logger.updateExecution(executionId, `Failed: ${errorMessage}`);
+            Logger.updateExecution(executionId, `Failed: ${errorMessage}`);
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({ content: '❌ An error occurred while processing this action.', flags: MessageFlags.Ephemeral }).catch(() => null);
             }

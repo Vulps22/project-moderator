@@ -1,7 +1,7 @@
 import { Client, Collection } from 'discord.js';
 import { Handler, Command } from '../utils';
 import { Config } from '../config';
-import { BotModalInteraction, BotSelectMenuInteraction } from '../structures';
+import { BotButtonInteraction, BotModalInteraction, BotSelectMenuInteraction } from '@vulps22/bot-interactions';
 
 declare global {
     var client: Client;
