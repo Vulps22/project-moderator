@@ -40,8 +40,9 @@ describe('Command', () => {
         .done();
 
       const json = command.toJSON();
-      expect(json.options[0].choices).toHaveLength(2);
-      expect(json.options[0].choices[0]).toMatchObject({ name: 'Option 1', value: 'opt1' });
+      const opt = json.options![0] as any;
+      expect(opt.choices).toHaveLength(2);
+      expect(opt.choices[0]).toMatchObject({ name: 'Option 1', value: 'opt1' });
     });
 
     it('should set min and max length', () => {
@@ -52,8 +53,9 @@ describe('Command', () => {
         .done();
 
       const json = command.toJSON();
-      expect(json.options[0].min_length).toBe(5);
-      expect(json.options[0].max_length).toBe(100);
+      const opt = json.options![0] as any;
+      expect(opt.min_length).toBe(5);
+      expect(opt.max_length).toBe(100);
     });
   });
 
@@ -64,7 +66,7 @@ describe('Command', () => {
         .done();
 
       const json = command.toJSON();
-      expect(json.options[0].type).toBe(4); // INTEGER type
+      expect(json.options![0].type).toBe(4); // INTEGER type
     });
 
     it('should set min and max value', () => {
@@ -75,8 +77,9 @@ describe('Command', () => {
         .done();
 
       const json = command.toJSON();
-      expect(json.options[0].min_value).toBe(1);
-      expect(json.options[0].max_value).toBe(10);
+      const opt = json.options![0] as any;
+      expect(opt.min_value).toBe(1);
+      expect(opt.max_value).toBe(10);
     });
   });
 
@@ -86,7 +89,7 @@ describe('Command', () => {
         .addBooleanOption('confirm', 'Confirm action', true);
 
       const json = command.toJSON();
-      expect(json.options[0].type).toBe(5); // BOOLEAN type
+      expect(json.options![0].type).toBe(5); // BOOLEAN type
     });
   });
 

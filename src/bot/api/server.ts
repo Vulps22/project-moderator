@@ -11,7 +11,7 @@ async function loadRoutesFromDirectory(app: Express, dirPath: string, basePath: 
   for (const item of items) {
     const itemPath = join(dirPath, item.name);
 
-    if (item.isDirectory()) {
+    if (item.isDirectory() && item.name !== 'tests') {
       await loadRoutesFromDirectory(app, itemPath, basePath);
     } else if (item.isFile() && item.name.endsWith('.js')) {
       const routeModule = await import(itemPath) as { default: ApiRoute };

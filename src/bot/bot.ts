@@ -62,7 +62,7 @@ async function loadHandlersFromDirectory<T>(
     for (const item of items) {
         const itemPath = join(dirPath, item.name);
 
-        if (item.isDirectory()) {
+        if (item.isDirectory() && item.name !== 'tests') {
             const newPrefix = prefix ? `${prefix}_${item.name}` : item.name;
             await loadHandlersFromDirectory(itemPath, collection, newPrefix);
         } else if (item.isFile() && item.name.endsWith('.js')) {
