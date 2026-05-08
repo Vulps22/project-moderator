@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            vulps23/project-moderator:latest
+            vulps23/project-moderator:${{ github.ref_name }}
