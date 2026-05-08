@@ -29,5 +29,5 @@ jobs:
           push: true
           build-args: NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
           tags: |
-            vulps23/project-moderator:latest
-            vulps23/project-moderator:${{ github.ref_name }}
+            vulps23/project-encourage-ms:latest
+            vulps23/project-encourage-ms:${{ github.ref_name }}
