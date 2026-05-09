@@ -52,7 +52,7 @@ async function userProfileView(profile: UserProfile, banReasons: any[] | null = 
         );
 
     // Account Dates
-    const createdDate = profile.createdDateTime.toLocaleDateString('en-US', {
+    const createdDate = new Date(profile.createdDateTime).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -63,7 +63,7 @@ async function userProfileView(profile: UserProfile, banReasons: any[] | null = 
     // Delete Date (only if scheduled for deletion)
     const deleteDateDisplay = profile.deleteDate
         ? new TextDisplayBuilder().setContent(
-            `**Scheduled for Deletion:** ${profile.deleteDate.toLocaleDateString('en-US', {
+            `**Scheduled for Deletion:** ${new Date(profile.deleteDate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'

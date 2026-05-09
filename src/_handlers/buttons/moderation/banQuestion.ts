@@ -16,6 +16,7 @@ const approveQuestionButton: Handler<BotButtonInteraction> = {
         }
 
         if(!reason) {
+            await interaction.deferUpdate();
             await showBanReasons(Number(questionId));
 
             interaction.message.awaitMessageComponent({
