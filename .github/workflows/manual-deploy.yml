@@ -46,7 +46,7 @@ jobs:
       - name: Deploy
         run: |
           ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} "
-            cd /opt/discord-bots/project-moderator &&
-            docker compose pull app &&
-            docker compose up -d app
+            cd /opt/discord-bots/project-encourage &&
+            docker compose pull ms &&
+            docker compose up -d ms
           "
