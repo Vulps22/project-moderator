@@ -34,7 +34,7 @@ async function loadRoutesFromDirectory(app: Express, dirPath: string, basePath: 
 }
 
 export async function createServer(): Promise<void> {
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+  const port = parseInt(process.env.MS_PORT ?? process.env.PORT ?? '3000');
   const app = express();
 
   app.use(express.json());
