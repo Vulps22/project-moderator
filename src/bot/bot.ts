@@ -134,11 +134,11 @@ async function loadEvents(client: Client): Promise<void> {
  * Register all commands with Discord API
  */
 async function registerCommands(): Promise<void> {
-    if (!process.env.DISCORD_TOKEN || !process.env.BOT_ID) {
-        throw new Error('Missing DISCORD_TOKEN or BOT_ID in environment variables');
+    if (!process.env.MS_DISCORD_TOKEN || !process.env.MS_CLIENT_ID) {
+        throw new Error('Missing DISCORD_TOKEN or MS_CLIENT_ID in environment variables');
     }
 
-    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+    const rest = new REST({ version: '10' }).setToken(process.env.MS_DISCORD_TOKEN);
 
     const globalCommands = await collectCommandsFromDirectory(join(__dirname, '..', '_handlers', 'commands', 'global'));
     const modCommands = await collectCommandsFromDirectory(join(__dirname, '..', '_handlers', 'commands', 'mod'));
@@ -178,7 +178,7 @@ async function registerGlobalCommands(rest: REST, commands: Command[]): Promise<
 
     try {
         await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID!),
+            Routes.applicationCommands(process.env.MS_CLIENT_ID!),
             { body: commands.map(cmd => cmd.toJSON() ) }
         );
         Logger.debug(`Registered ${commands.length} global commands`);
@@ -205,7 +205,7 @@ async function registerModCommands(rest: REST, commands: Command[]): Promise<voi
 
     try {
         await rest.put(
-            Routes.applicationGuildCommands(process.env.BOT_ID!, process.env.GUILD_ID),
+            Routes.applicationGuildCommands(process.env.MS_CLIENT_ID!, process.env.GUILD_ID),
             { body: commands.map(cmd => cmd.toJSON()) }
         );
         Logger.debug(`Registered ${commands.length} mod commands to guild ${process.env.GUILD_ID}`);
@@ -241,7 +241,7 @@ async function startBot(): Promise<void> {
         })();
     });
 
-    await client.login().catch((error: Error) => {
+    await client.login(process.env.MS_DISCORD_TOKEN).catch((error: Error) => {
         console.error('Failed to login:', error);
         process.exit(1);
     });
