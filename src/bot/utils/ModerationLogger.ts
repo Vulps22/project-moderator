@@ -3,6 +3,7 @@ import { Question, Report, ServerProfile } from '@vulps22/project-encourage-type
 import { Config } from '../config';
 import { Logger } from './Logger';
 import { newQuestionView } from '../../views/moderation/newQuestionView';
+import { userService, serverService } from '../../services';
 import { serverView } from '../../views/moderation/serverView';
 import { ReportView } from '../../views/moderation/reportView';
 import { BanReason } from '../../services/ModerationService';
@@ -10,20 +11,16 @@ import { BanReason } from '../../services/ModerationService';
 export class ModerationLogger {
 
   static async logQuestion(question: Question, channelId: Snowflake): Promise<Message | null> {
-    let username = 'Unknown User';
-    let guildName = 'Unknown Server';
-    try {
-      const user = await global.client.users.fetch(question.user_id);
-      if (user) username = user.username;
-    } catch { /* best-effort */ }
-    try {
-      const guild = await global.client.guilds.fetch(question.server_id);
-      if (guild) guildName = guild.name;
-    } catch { /* best-effort */ }
+    const [userResult, serverResult] = await Promise.allSettled([
+      userService.getUser(question.user_id),
+      serverService.getServerSettings(question.server_id),
+    ]);
+    const user = userResult.status === 'fulfilled' ? userResult.value : null;
+    const server = serverResult.status === 'fulfilled' ? serverResult.value : null;
 
     const ch = global.client.channels.cache.get(channelId) as TextChannel | undefined;
     if (!ch?.isTextBased()) return null;
-    const view = await newQuestionView(question, null, { username, guildName });
+    const view = await newQuestionView(question, null, user, server);
     return ch.send(view as MessageCreateOptions);
   }
 
@@ -34,8 +31,14 @@ export class ModerationLogger {
     const ch = global.client.channels.cache.get(channelId) as TextChannel | undefined;
     if (!ch?.isTextBased()) return null;
     try {
+      const [userResult, serverResult] = await Promise.allSettled([
+        userService.getUser(question.user_id),
+        serverService.getServerSettings(question.server_id),
+      ]);
+      const user = userResult.status === 'fulfilled' ? userResult.value : null;
+      const server = serverResult.status === 'fulfilled' ? serverResult.value : null;
       const existing = await ch.messages.fetch(question.message_id);
-      const view = await newQuestionView(question, reasons as [] | null);
+      const view = await newQuestionView(question, reasons as [] | null, user, server);
       return existing.edit(view as unknown as MessageEditOptions);
     } catch (err) {
       Logger.error(`Failed to update question log: ${JSON.stringify(err)}`);

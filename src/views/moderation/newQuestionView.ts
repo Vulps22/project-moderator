@@ -1,8 +1,8 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags, SeparatorBuilder, StringSelectMenuBuilder, TextDisplayBuilder } from "discord.js";
-import type { Question } from "@vulps22/project-encourage-types";
+import type { Question, User, Server } from "@vulps22/project-encourage-types";
 import { UniversalMessage } from "@vulps22/bot-interactions";
 
-async function newQuestionView(question: Question, banReasons: [] | null = null, prefetched?: { username?: string, guildName?: string }): Promise<UniversalMessage> {
+async function newQuestionView(question: Question, banReasons: [] | null = null, user?: User | null, server?: Server | null): Promise<UniversalMessage> {
 
 
     const title = new TextDisplayBuilder()
@@ -11,19 +11,8 @@ async function newQuestionView(question: Question, banReasons: [] | null = null,
     const questionText = new TextDisplayBuilder()
         .setContent(`**Question:** \n ${question.question}`);
 
-    let username: string;
-    let guildName: string;
-
-    if (prefetched?.username !== undefined && prefetched?.guildName !== undefined) {
-        username = prefetched.username;
-        guildName = prefetched.guildName;
-    } else {
-        const client = global.client;
-        const user = await client.users.fetch(question.user_id);
-        username = user ? user.username : 'Unknown User';
-        const guild = await client.guilds.fetch(question.server_id);
-        guildName = guild.name;
-    }
+    const username = user?.username ?? 'Unknown User';
+    const guildName = server?.name ?? 'Unknown Server';
 
     const authorInfo = new TextDisplayBuilder()
         //.setContent(`**Submitted by:**\n<@${question.user_id}> | ${question.user_id})`);
