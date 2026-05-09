@@ -24,7 +24,7 @@ export { StorableService } from './StorableService';
 export { InventoryService } from './InventoryService';
 export { LoggerService } from './LoggerService';
 
-export const db = new DatabaseClient(process.env.DS_URL!);
+export const db = new DatabaseClient(process.env.DS_URL!, process.env.MS_API_SECRET ?? '');
 
 export const challengeService = new ChallengeService(db);
 export const configurationService = new ConfigurationService(db);

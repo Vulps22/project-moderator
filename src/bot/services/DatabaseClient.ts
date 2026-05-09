@@ -3,7 +3,7 @@ import { User, Server, Question, Challenge, ChallengeVote, CoreConfig, Storable,
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 export class DatabaseClient {
-  constructor(private baseUrl: string) {}
+  constructor(private baseUrl: string, private token: string) {}
 
   private async request<T>(
     method: HttpMethod,
@@ -19,7 +19,10 @@ export class DatabaseClient {
     }
     const response = await fetch(url.toString(), {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.token}`,
+      },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
     const data = await response.json().catch(() => null);
