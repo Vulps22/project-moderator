@@ -11,8 +11,12 @@ export class LoggerService {
   }
 
   static async postTo(channelId: string, message: UniversalMessage): Promise<Message> {
+    console.log(`[DEBUG MS/LoggerService] postTo — channelId=${channelId}`);
     const channel = await LoggerService.resolveChannel(channelId);
-    return channel.send(message as MessageCreateOptions);
+    console.log(`[DEBUG MS/LoggerService] Channel resolved — name=${channel.name} calling channel.send()`);
+    const posted = await channel.send(message as MessageCreateOptions);
+    console.log(`[DEBUG MS/LoggerService] channel.send() succeeded — messageId=${posted.id}`);
+    return posted;
   }
 
   static async update(
