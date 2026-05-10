@@ -5,7 +5,7 @@ import { Handler, Command, Logger } from './utils';
 import { EventHandler } from './types';
 import { Config } from './config';
 import { BotButtonInteraction, BotModalInteraction, BotSelectMenuInteraction } from '@vulps22/bot-interactions';
-import { createServer } from './api/server';
+import { createServer } from '@vulps22/dynamic-endpoint-router';
 
 /**
  * Initialize global objects
@@ -237,7 +237,10 @@ async function startBot(): Promise<void> {
             Logger.debug('Client is ready. Registering commands...');
             await registerCommands();
             Logger.debug('Commands registered successfully');
-            await createServer();
+            await createServer({
+                port: parseInt(process.env.MS_PORT ?? process.env.PORT ?? '3000'),
+                routesPath: join(__dirname, '..', 'routes'),
+            });
         })();
     });
 
