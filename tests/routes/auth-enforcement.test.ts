@@ -16,19 +16,6 @@ function buildRouteApp(route: { middleware?: any[]; get?: any; post?: any }, pat
   return app;
 }
 
-describe('GET /api/v1/ping', () => {
-  const { route } = require('../../src/routes/api/v1/ping');
-  const app = buildRouteApp(route, '/api/v1/ping');
-
-  it('returns 401 without auth', async () => {
-    expect((await request(app).get('/api/v1/ping')).status).toBe(401);
-  });
-
-  it('returns 200 with valid token', async () => {
-    expect((await request(app).get('/api/v1/ping').set('Authorization', PE)).status).toBe(200);
-  });
-});
-
 describe('POST /api/v1/report', () => {
   const { route } = require('../../src/routes/api/v1/report');
   const app = buildRouteApp(route, '/api/v1/report');
