@@ -4,7 +4,8 @@
   "description": "Decoupled Discord moderation bot with webhook ingestion and interactive log messages",
   "main": "dist/bot/bot.js",
   "scripts": {
-    "build": "tsc",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc",
     "start": "node --env-file=.env dist/bot/bot.js",
     "dev": "npm run build && node --env-file=../.env.development --watch dist/bot/bot.js",
     "stage": "node --env-file=.env.staging dist/bot/bot.js",
@@ -17,11 +18,14 @@
   },
   "dependencies": {
     "@types/pg": "^8.11.11",
+    "@types/supertest": "^7.2.0",
     "@vulps22/bot-interactions": "^1.0.1",
+    "@vulps22/dynamic-endpoint-router": "^1.0.1",
     "@vulps22/project-encourage-types": "^1.0.0",
     "discord.js": "^14.16.3",
-    "express": "^4.21.2",
-    "pg": "^8.13.3"
+    "express": "^5.2.1",
+    "pg": "^8.13.3",
+    "supertest": "^7.2.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

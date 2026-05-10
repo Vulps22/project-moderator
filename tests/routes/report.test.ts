@@ -1,8 +1,8 @@
-import report from '../report';
-import { reportService } from '../../services';
+import { route as report } from '../../src/routes/api/v1/report';
+import { reportService } from '../../src/services';
 import { TargetType } from '@vulps22/project-encourage-types';
 
-jest.mock('../../services', () => ({
+jest.mock('../../src/services', () => ({
   reportService: {
     createReport: jest.fn(),
   },
@@ -16,7 +16,7 @@ const mockRes = () => {
   return res;
 };
 
-describe('POST /report', () => {
+describe('POST /api/v1/report', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -24,9 +24,7 @@ describe('POST /report', () => {
   it('should return 400 when senderId is missing', async () => {
     const req = mockReq({ offenderId: '42', type: TargetType.Question, serverId: '999' });
     const res = mockRes();
-
     await report.post!(req, res);
-
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: 'Missing required fields: senderId, offenderId, type, serverId' });
   });
@@ -34,9 +32,7 @@ describe('POST /report', () => {
   it('should return 400 when offenderId is missing', async () => {
     const req = mockReq({ senderId: '111', type: TargetType.Question, serverId: '999' });
     const res = mockRes();
-
     await report.post!(req, res);
-
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: 'Missing required fields: senderId, offenderId, type, serverId' });
   });
@@ -44,9 +40,7 @@ describe('POST /report', () => {
   it('should return 400 when type is missing', async () => {
     const req = mockReq({ senderId: '111', offenderId: '42', serverId: '999' });
     const res = mockRes();
-
     await report.post!(req, res);
-
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: 'Missing required fields: senderId, offenderId, type, serverId' });
   });
@@ -54,9 +48,7 @@ describe('POST /report', () => {
   it('should return 400 when serverId is missing', async () => {
     const req = mockReq({ senderId: '111', offenderId: '42', type: TargetType.Question });
     const res = mockRes();
-
     await report.post!(req, res);
-
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: 'Missing required fields: senderId, offenderId, type, serverId' });
   });
@@ -74,7 +66,6 @@ describe('POST /report', () => {
       reason: 'Spam',
     });
     const res = mockRes();
-
     await report.post!(req, res);
 
     expect(reportService.createReport).toHaveBeenCalledWith('111', '42', 'Some content', TargetType.Question, '999', 'Spam');
@@ -86,14 +77,8 @@ describe('POST /report', () => {
     const mockReport = { id: 2, type: TargetType.User };
     (reportService.createReport as jest.Mock).mockResolvedValue(mockReport);
 
-    const req = mockReq({
-      senderId: '111',
-      offenderId: '42',
-      type: TargetType.User,
-      serverId: '999',
-    });
+    const req = mockReq({ senderId: '111', offenderId: '42', type: TargetType.User, serverId: '999' });
     const res = mockRes();
-
     await report.post!(req, res);
 
     expect(reportService.createReport).toHaveBeenCalledWith('111', '42', null, TargetType.User, '999', undefined);
@@ -111,7 +96,6 @@ describe('POST /report', () => {
       serverId: '999',
     });
     const res = mockRes();
-
     await report.post!(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
