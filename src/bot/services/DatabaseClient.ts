@@ -10,14 +10,15 @@ export class DatabaseClient {
     path: string,
     body?: Record<string, unknown>,
     query?: Record<string, string>
-  ): Promise<{ status: number; data: T }> {
+  ): Promise<{ status: number; data: T; url: string }> {
     const url = new URL(`${this.baseUrl}${path}`);
     if (query) {
       for (const [key, value] of Object.entries(query)) {
         if (value !== undefined) url.searchParams.set(key, value);
       }
     }
-    const response = await fetch(url.toString(), {
+    const urlStr = url.toString();
+    const response = await fetch(urlStr, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -26,33 +27,33 @@ export class DatabaseClient {
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
     const data = await response.json().catch(() => null);
-    return { status: response.status, data: data as T };
+    return { status: response.status, data: data as T, url: urlStr };
   }
 
   private async _get<T>(path: string, query?: Record<string, string>): Promise<T | null> {
-    const { status, data } = await this.request<T>('GET', path, undefined, query);
+    const { status, data, url } = await this.request<T>('GET', path, undefined, query);
     if (status === 404) return null;
-    if (status >= 400) throw new Error(`DS GET ${path} failed: ${status} - ${JSON.stringify(data)}`);
+    if (status >= 400) throw new Error(`DS GET ${url} failed: ${status} - ${JSON.stringify(data)}`);
     return data;
   }
 
   private async _post<T>(path: string, body?: Record<string, unknown>): Promise<T> {
-    const { status, data } = await this.request<T>('POST', path, body);
-    if (status >= 400) throw new Error(`DS POST ${path} failed: ${status} - ${JSON.stringify(data)}`);
+    const { status, data, url } = await this.request<T>('POST', path, body);
+    if (status >= 400) throw new Error(`DS POST ${url} failed: ${status} - ${JSON.stringify(data)}`);
     return data;
   }
 
   private async _patch<T>(path: string, body: Record<string, unknown>): Promise<T | null> {
-    const { status, data } = await this.request<T>('PATCH', path, body);
+    const { status, data, url } = await this.request<T>('PATCH', path, body);
     if (status === 404) return null;
-    if (status >= 400) throw new Error(`DS PATCH ${path} failed: ${status} - ${JSON.stringify(data)}`);
+    if (status >= 400) throw new Error(`DS PATCH ${url} failed: ${status} - ${JSON.stringify(data)}`);
     return data;
   }
 
   private async _delete<T>(path: string): Promise<T | null> {
-    const { status, data } = await this.request<T>('DELETE', path);
+    const { status, data, url } = await this.request<T>('DELETE', path);
     if (status === 404) return null;
-    if (status >= 400) throw new Error(`DS DELETE ${path} failed: ${status} - ${JSON.stringify(data)}`);
+    if (status >= 400) throw new Error(`DS DELETE ${url} failed: ${status} - ${JSON.stringify(data)}`);
     return data;
   }
 
